@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+ <!--mapper⽂件相当于DAO接⼝的‘实现类’，namespace属性要指定`实现`DAO接⼝的全限定名-->
+<mapper namespace="com.hexiang.dao.StudentDao">
+
+    <resultMap id="StudentMap" type="com.hexiang.pojo.Student">
+        <id column="stu_id" property="stuId"/>
+        <result column="stu_num" property="stuNum"/>
+        <result column="stu_name" property="stuName"/>
+        <result column="stu_gender" property="stuGender"/>
+        <result column="stu_age" property="stuAge"/>
+    </resultMap>
+
+    <sql id="studentTable">
+            stu_id ,
+            stu_num ,
+            stu_name ,
+            stu_gender ,
+            stu_age
+            </sql>
+
+    <insert id="insertStudent" useGeneratedKeys="true" keyProperty="stuId">
+        insert into tb_students(stu_num,stu_name,stu_gender,stu_age)
+            values (#{stuNum},#{stuName},#{stuGender},#{stuAge})
+    </insert>
+
+    <update id="updateStudent">
+        update tb_students set
+            stu_num = #{stuNum},
+            stu_name = #{stuName},
+            stu_gender = #{stuGender},
+            stu_age = #{stuAge}
+        where
+            stu_num = #{stuNum}
+
+    </update>
+
+    <delete id="deleteStudentByStuNum">
+        delete from tb_students where stu_num = #{stuNum}
+    </delete>
+
+    <select id="getAllStudent" resultMap="StudentMap">
+        select
+           <include refid="studentTable"/>
+        from tb_students
+    </select>
+
+    <select id="getOneByStuNum" resultMap="StudentMap">
+        select
+        <include refid="studentTable"/>
+        from tb_students
+        where stu_num = #{stuNum}
+    </select>
+
+    <select id="getStudentByPage" resultMap="StudentMap">
+        select
+        <include refid="studentTable"/>
+        from tb_students
+        limit #{start} , #{pageSize}
+    </select>
+
+    <select id="getStudentCount" resultType="java.lang.Integer">
+        select count(1) from tb_students
+    </select>
+
+
+</mapper>

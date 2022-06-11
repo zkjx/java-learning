@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+ <!--mapper⽂件相当于DAO接⼝的‘实现类’，namespace属性要指定`实现`DAO接⼝的全限定名-->
+<mapper namespace="com.hexiang.mybatis.dao.BookDao">
+
+    <resultMap id="BookMap" type="com.hexiang.mybatis.pojo.Book">
+        <id column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="author" property="author"/>
+        <result column="publication_date" property="publication_date"/>
+        <result column="price" property="price"/>
+    </resultMap>
+
+<!--    通用查询结果-->
+    <sql id="BookTable">
+        id,
+        title,
+        author,
+        publication_date,
+        price
+    </sql>
+
+<!--    添加书本-->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_book(title, author, publication_date, price)
+        values (#{title},#{author},#{publication_date},#{price})
+    </insert>
+
+<!--    更新书本信息-->
+    <update id="update">
+        update tb_book set
+                           title = #{title},
+                           author = #{author},
+                           publication_date = #{publication_date},
+                           price = #{price}
+        where
+            id = #{id}
+    </update>
+
+<!--    删除书本-->
+    <delete id="delete">
+        delete from tb_book where id = #{id}
+    </delete>
+
+<!--    获取指定书本信息-->
+    <select id="getOneBook" resultMap="BookMap">
+        select <include refid="BookTable"/>
+        from tb_book
+        where id = #{id}
+    </select>
+
+<!--    获取所有书本信息-->
+    <select id="getAllBook" resultMap="BookMap">
+        select <include refid="BookTable"/>
+        from tb_book
+    </select>
+
+<!--    查询书本数量-->
+    <select id="getBookCount" resultType="java.lang.Integer">
+        select count(1) from tb_book
+    </select>
+
+<!--    分页查询书本信息-->
+    <select id="getBookByPage" resultMap="BookMap">
+        select <include refid="BookTable"/>
+        from tb_book
+        limit #{start}, #{pageSize}
+    </select>
+
+
+
+
+</mapper>

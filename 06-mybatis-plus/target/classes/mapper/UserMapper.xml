@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hexiang.mybatisplus.mapper.UserMapper">
+
+    <select id="findMyUser" resultType="com.hexiang.mybatisplus.pojo.User">
+        select * from tb_user where id = #{id}
+    </select>
+
+    <select id="findMyUserByWrapper" resultType="com.hexiang.mybatisplus.pojo.User">
+        SELECT * FROM tb_user ${ew.customSqlSegment}
+    </select>
+</mapper>
