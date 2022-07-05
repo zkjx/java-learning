@@ -1,0 +1,32 @@
+server:
+  port: 8081
+
+mybatis:
+  type-aliases-package: com.hexiang.user.pojo
+  configuration:
+    map-underscore-to-camel-case: true
+
+logging:
+  level:
+    com.hexiang: debug
+  pattern:
+    dateformat: MM-dd HH:mm:ss:SSS
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/cloud_user?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    username: root
+    password: root
+#  cloud:
+#    nacos:
+#      server-addr: localhost:8848 # nacos服务地址
+#      discovery:
+#        cluster-name: HZ # 集群名称
+#  application:
+#    name: userservice # user 服务的服务名称
+
+#eureka:
+#  client:
+#    service-url: # eureka的地址信息
+#      defaultZone: http://127.0.0.1:10086/eureka
