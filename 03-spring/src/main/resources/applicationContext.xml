@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--对于一个xml文件如果作为框架的配置文件，需要遵守框架的配置使用-->
+<!--通常一个框架为了让开发者能够正确的配置，都会提供xml的规范文件（dtd\xsd）-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd
+">
+
+    <!--   ······························· Spring&Mybatis整合 ···········································  -->
+
+    <!--加载druid.properties属性⽂件-->
+    <context:property-placeholder location="classpath:druid.properties"/>
+
+    <bean id="druidDataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="driverClassName" value="${druid.driver}"/>
+        <property name="url" value="${druid.url}"/>
+        <property name="username" value="${druid.username}"/>
+        <property name="password" value="${druid.password}"/>
+        <property name="initialSize" value="${druid.pool.init}"/>
+        <property name="minIdle" value="${druid.pool.minIdle}"/>
+        <property name="maxActive" value="${druid.pool.maxActive}"/>
+        <property name="maxWait" value="${druid.pool.timeout}"/>
+    </bean>
+
+    <!--依赖Spring容器完成MyBatis的SqlSessionFactory对象的创建-->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean" >
+        <!--配置数据源-->
+        <property name="dataSource" ref="druidDataSource"/>
+        <!--配置mapper⽂件的路径-->
+        <property name="mapperLocations" value="classpath:mapper/*Mapper.xml"/>
+        <!--配置需要定义别名的实体类的包-->
+        <property name="typeAliasesPackage" value="com.hexiang.spring.pojo"/>
+        <!--可选：配置MyBatis的主配置⽂件-->
+        <property name="configLocation" value="classpath:mybatis-config.xml"/>
+    </bean>
+
+    <!--加载dao包中的所有DAO接⼝，通过sqlSessionFactory获取SqlSession，然后创建所有的DAO接⼝对象，存储在Spring容器-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+        <property name="basePackage" value="com.hexiang.spring.dao"/>
+    </bean>
+
+    <bean id="tBookService" class="com.hexiang.spring.service.impl.TBookServiceImpl"/>
+
+    <!--   ······························· Transaction事务 ···········································  -->
+
+    <!--1.将Spring提供的事务管理配置配置给Spring容器-->
+    <bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="druidDataSource"/>
+    </bean>
+
+    <!--2.通过Spring jdbc提供的 tx标签，声明事务管理策略-->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="sellBook" isolation="REPEATABLE_READ" propagation="REQUIRED"/>
+<!--            <tx:method name="insert*" isolation="REPEATABLE_READ" propagation="REQUIRED"/>-->
+<!--            <tx:method name="delete*" isolation="REPEATABLE_READ" propagation="REQUIRED"/>-->
+<!--            <tx:method name="update*" isolation="REPEATABLE_READ" propagation="REQUIRED"/>-->
+<!--            <tx:method name="query*" isolation="REPEATABLE_READ" propagation="SUPPORTS"/>-->
+        </tx:attributes>
+    </tx:advice>
+
+    <!--3.将事务管理策略以AOP配置 应⽤于DAO操作⽅法-->
+    <aop:config>
+        <aop:pointcut id="crud" expression="execution(* com.hexiang.spring.service.*.*(..))"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="crud"/>
+    </aop:config>
+
+    <!--   ·································· Aop实验 ···········································  -->
+
+<!--    定义被切的Bean-->
+    <bean id="visitService" class="com.hexiang.spring.service.impl.VisitServiceImpl"/>
+<!--    定义切面-->
+    <bean id="myAspectXml" class="com.hexiang.spring.aspect.MyAspectXml"/>
+
+    <aop:config>
+<!--    配置切入点-->
+        <aop:pointcut id="pt" expression="execution(* com.hexiang.spring.service.impl.VisitServiceImpl.*(..))"/>
+<!--    配置切面-->
+        <aop:aspect ref="myAspectXml">
+            <aop:around method="around" pointcut-ref="pt"/>
+            <aop:after method="afterAdvice" pointcut-ref="pt"/>
+            <aop:after-returning method="afterReturningAdvice" pointcut-ref="pt" />
+            <aop:after-throwing method="afterThrowingAdvice" pointcut-ref="pt" throwing="e"/>
+        </aop:aspect>
+    </aop:config>
+
+
+    <!--   ·································· Ioc实验 ··········································  -->
+
+<!--    通过bean将实体类配置给Spring容器-->
+<!--    <bean id="person" class="com.hexiang.spring.pojo.Person">-->
+<!--        <property name="name" value="Zhangsan"/>-->
+<!--        <property name="pet" >-->
+<!--            <bean class="com.hexiang.spring.pojo.Dog">-->
+<!--                <property name="name" value="WangWang"/>-->
+<!--            </bean>-->
+<!--        </property>-->
+<!--    </bean>-->
+
+
+
+</beans>

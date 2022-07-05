@@ -1,0 +1,24 @@
+spring:
+  # 数据源配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/db_javaee?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    username: root
+    password: root
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/*Mapper.xml
+  global-config:
+    db-config:
+      # 表前缀
+      table-prefix: tb_
+      # 主键自增
+      id-type: AUTO
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+
+# SQL打印(方法接口所在的包，不是Mapper.xml所在的包)
+logging:
+  level:
+    com.hexiang.mybatisplus.mapper: debug
