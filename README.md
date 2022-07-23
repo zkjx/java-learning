@@ -1,4 +1,4 @@
-# JavaEE
-JavaEE course learning code —— JavaEE课程学习资料
+# JavaWeb 篇
+**javaweb篇**学习实战的内容有：
 
-实验讲解视频：[https://www.bilibili.com/video/BV1WY411G7d8](https://www.bilibili.com/video/BV1WY411G7d8?_blank)
+- brand-demo项目案例
