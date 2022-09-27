@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<script src="../js/vue.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+
+<style>
+  .el-table .warning-row {
+    background: oldlace;
+  }
+
+  .el-table .success-row {
+    background: #f0f9eb;
+  }
+
+  .bg-purple-dark {
+         background: #99a9bf;
+     }
+
+  .grid-content {
+      border-radius: 4px;
+      min-height: 36px;
+  }
+</style>
+
+
+<body>
+
+</body>
+  <div id="app">
+<!--      搜索表单-->
+<!--      <el-form :inline="true" :model="Book" class="demo-form-inline">-->
+<!--          <el-form-item label="当前状态">-->
+<!--              <el-select v-model="Book" placeholder="当前状态">-->
+<!--                  <el-option label="启用" value="1"></el-option>-->
+<!--                  <el-option label="禁用" value="0"></el-option>-->
+<!--              </el-select>-->
+<!--          </el-form-item>-->
+<!--          <el-form-item label="书名">-->
+<!--              <el-input v-model="Book.bookName" placeholder="书名"></el-input>-->
+<!--          </el-form-item>-->
+<!--              <el-form-item label="作者">-->
+<!--                  <el-input v-model="Book.author" placeholder="作者"></el-input>-->
+<!--              </el-form-item>-->
+<!--          <el-form-item>-->
+<!--              <el-button type="primary" @click="onSubmit">查询</el-button>-->
+<!--          </el-form-item>-->
+<!--      </el-form>-->
+
+      <el-row>
+          <el-col :span="24" align="middle" justify="center"><div class="grid-content bg-purple-dark">欢迎使用图书管理系统
+
+              <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" @select="handleSelect">
+              </el-menu>
+              <div class="line"></div>
+              <el-menu
+                      :default-active="activeIndex2"
+                      class="el-menu-demo"
+                      mode="horizontal"
+                      @select="handleSelect"
+                      background-color="#99a9bf"
+                      text-color="#fff"
+                      active-text-color="#ffd04b">
+                  <el-submenu index="2">
+                      <template slot="title">菜单选项</template>
+                      <el-menu-item index="2-1" @click="dialogVisible=true">录入书籍基本信息</el-menu-item>
+                      <el-menu-item index="2-2" @click="dialogVisible3=true">修改书籍基本信息</el-menu-item>
+                      <el-menu-item index="2-3" @click="dialogVisible4=true">删除书籍基本信息</el-menu-item>
+                      <el-menu-item index="2-4" @click="dialogVisible5=true">查询书籍基本信息</el-menu-item>
+                      <el-menu-item index="2-5" @click="selectall">查询全部书籍信息</el-menu-item>
+                      <el-menu-item index="2-6" @click="dialogVisible6=true">借阅书籍</el-menu-item>
+                  </el-submenu>
+              </el-menu>
+          </div></el-col>
+
+
+      </el-row>
+
+<!--      新增 和 批量删除 按钮 -->
+<!--      <el-row>-->
+<!--          <el-button type="danger" plain>批量删除</el-button>-->
+<!--          <el-button type="primary" @click="dialogVisible = true" plain >新增</el-button>-->
+<!--      </el-row>-->
+
+
+<!--      导航栏-->
+
+<!--对话框-->
+      <el-dialog
+              title="编辑品牌"
+              :visible.sync="dialogVisible"
+              width="30%">
+<!--          用来填充表单内容  添加书籍-->
+          <el-form ref="addform" :model="Book" label-width="80px" @close="resetForm" >
+              <el-form-item label="书名">
+                  <el-input v-model="Book.bookName"></el-input>
+              </el-form-item>
+              <el-form-item label="书号">
+                  <el-input v-model="Book.bookNumber"></el-input>
+              </el-form-item>
+              <el-form-item label="作者">
+                  <el-input v-model="Book.author"></el-input>
+              </el-form-item>
+              <el-form-item label="价格">
+                  <el-input v-model="Book.price"></el-input>
+              </el-form-item>
+              <el-form-item label="描述">
+                  <el-input type="textarea" v-model="Book.description"></el-input>
+              </el-form-item>
+              <el-form-item>
+                  <el-button type="primary" @click="addbrand();resetaddform()">提交</el-button>
+                  <el-button  @click="dialogVisible=false">取消</el-button>
+              </el-form-item>
+          </el-form>
+
+      </el-dialog>
+
+<!--      表格-->
+    <template>
+<!--        表格tableData是所有数据之和-->
+      <el-table
+              :data="tableData"
+              style="width: 100%"
+              :row-class-name="tableRowClassName"
+              @selection-change="handleSelectionChange">
+<!--        selection—change 用于点击复选框时候 会返回id  可结合后台  使用这个方法 需要在methods中添加方法体先-->
+        <el-table-column
+                type="selection"
+                width="55">
+        </el-table-column>
+        <el-table-column
+                prop="id"
+                label="id"
+                type="index">
+        </el-table-column>
+          <el-table-column
+                  prop="bookNumber"
+                  label="书号"
+                  align="center">
+          </el-table-column>
+        <el-table-column
+                prop="bookName"
+                label="书名"
+                align="center"
+                >
+        </el-table-column>
+        <el-table-column
+                prop="author"
+                label="作者"
+                align="center"
+                >
+        </el-table-column>
+<!--        对于prop  写data里面的键的名字   label 表头的各项名称   align 用于将表格的内容与表头对齐-->
+        <el-table-column
+                prop="price"
+                label="价格"
+                align="center"
+        >
+        </el-table-column>
+        <el-table-column
+                prop="description"
+                label="描述"
+                align="center"
+        >
+        </el-table-column>
+        <el-table-column
+                prop="status"
+                label="状态"
+                align="center">
+<!--            <template slot-scope="scope">-->
+<!--                <el-button-->
+<!--                        size="mini"-->
+<!--                        @click="handleUpdate(scope.row)">修改</el-button>-->
+<!--                <el-button-->
+<!--                        size="mini"-->
+<!--                        type="danger"-->
+<!--                        @click="handleDelete(scope.row)">删除</el-button>-->
+<!--            </template>-->
+
+<!--            星级评价-->
+
+                <el-rate
+                        v-model="star" @change="rateChange" show-text >
+                </el-rate>
+
+
+        </el-table-column>
+      </el-table>
+    </template>
+
+
+
+<!--      用于弹出修改的编辑窗口-->
+      <el-dialog
+              title="提示"
+              :visible.sync="dialogVisible2"
+              width="30%">
+          <el-form :inline="true" :model="Book" class="demo-form-inline">
+              <el-form-item label="书名">
+                  <el-input v-model="Book.bookName" placeholder="书名"></el-input>
+              </el-form-item>
+              <el-form-item label="书号">
+                  <el-input v-model="Book.bookNumber" placeholder="书号"></el-input>
+              </el-form-item>
+              <el-form-item label="作者">
+                  <el-input v-model="Book.author" placeholder="作者"></el-input>
+              </el-form-item>
+              <el-form-item label="价格">
+                  <el-input v-model="Book.price" placeholder="价格"></el-input>
+              </el-form-item>
+              <el-form-item>
+                  <el-button type="primary" @click="handleEdit()" >提交</el-button>
+                  <el-button  @click="dialogVisible2=false;resetaddform() " >取消</el-button>
+              </el-form-item>
+          </el-form>
+      </el-dialog>
+
+      <!--      用于弹出确认书籍是否有误的窗口-->
+      <el-dialog
+              title="请核实你输入的书籍号是否是为要借阅的书籍"
+              :visible.sync="dialogVisible7"
+              width="30%">
+          <el-form :inline="true" :model="Book" class="demo-form-inline">
+              <el-form-item label="书名">
+                  <el-input v-model="Book.bookName" placeholder="书名"></el-input>
+              </el-form-item>
+              <el-form-item label="书号">
+                  <el-input v-model="Book.bookNumber" placeholder="书号"></el-input>
+              </el-form-item>
+              <el-form-item label="作者">
+                  <el-input v-model="Book.author" placeholder="作者"></el-input>
+              </el-form-item>
+              <el-form-item label="价格">
+                  <el-input v-model="Book.price" placeholder="价格"></el-input>
+              </el-form-item>
+              <el-form-item>
+                  <el-button type="primary" @click=" handleDeleteByBorrow" >提交</el-button>
+                  <el-button  @click="dialogVisible7=false;resetaddform" >取消</el-button>
+              </el-form-item>
+          </el-form>
+      </el-dialog>
+
+
+
+<!--      获取修改数据所需要的id的对话框-->
+      <el-dialog
+              title="提示"
+              :visible.sync="dialogVisible3"
+              width="30%">
+          <el-form :inline="true" :model="book" class="demo-form-inline">
+              <el-form-item label="请输入你要修改的书籍相应的id">
+                  <el-input v-model="book.updateId" placeholder="id"></el-input>
+              </el-form-item>
+              <el-form-item>
+                  <el-button type="primary" @click="handleUpdate();resetupdateform()" >提交</el-button>
+                  <el-button  @click="dialogVisible3=false" >取消</el-button>
+              </el-form-item>
+          </el-form>
+      </el-dialog>
+
+<!--      获取删除数据所需要的id的对话框-->
+      <el-dialog
+              title="提示"
+              :visible.sync="dialogVisible4"
+              width="30%">
+          <el-form :inline="true" :model="book" class="demo-form-inline">
+              <el-form-item label="请输入你要删除的书籍相应的id">
+                  <el-input v-model="book.deleteId" placeholder="id"></el-input>
+              </el-form-item>
+              <el-form-item>
+                  <el-button type="primary" @click="handleDelete" >提交</el-button>
+                  <el-button  @click="dialogVisible4=false" >取消</el-button>
+              </el-form-item>
+          </el-form>
+      </el-dialog>
+
+      <!--      获取按书名查询书的数据所需要的书名的对话框-->
+      <el-dialog
+              title="提示"
+              :visible.sync="dialogVisible5"
+              width="30%">
+          <el-form :inline="true" :model="book" class="demo-form-inline">
+              <el-form-item label="请输入你要查询的书籍的书名">
+                  <el-input v-model="book.bookName" placeholder="bookName"></el-input>
+              </el-form-item>
+              <el-form-item>
+                  <el-button type="primary" @click="handleGetBookName" >提交</el-button>
+                  <el-button  @click="dialogVisible5=false" >取消</el-button>
+              </el-form-item>
+          </el-form>
+      </el-dialog>
+
+<!--      获取借阅书籍所需要的书名号的对话框-->
+      <el-dialog
+              title="提示"
+              :visible.sync="dialogVisible6"
+              width="30%">
+          <el-form :inline="true" :model="book" class="demo-form-inline">
+              <el-form-item label="请输入你要借阅的书籍的书籍号">
+                  <el-input v-model="book.bookNumber" placeholder="bookNumber"></el-input>
+              </el-form-item>
+              <el-form-item>
+                  <el-button type="primary" @click="handleBorrowBooks();" >提交</el-button>
+                  <el-button  @click="dialogVisible6=false;" >取消</el-button>
+              </el-form-item>
+          </el-form>
+      </el-dialog>
+
+<!--      用于在借阅书籍成功后显示的对话框-->
+      <el-dialog
+              title="提示"
+              :visible.sync="dialogVisible8"
+              width="30%"
+              :before-close="handleClose">
+          <span>恭喜,借阅成功</span>
+          <span slot="footer" class="dialog-footer">
+    <el-button @click="dialogVisible8= false">取 消</el-button>
+    <el-button type="primary" @click="dialogVisible8 = false">确 定</el-button>
+  </span>
+      </el-dialog>
+
+<!--      用于在借阅书籍失败后显示的对话框-->
+      <el-dialog
+              title="提示"
+              :visible.sync="dialogVisible9"
+              width="30%"
+              :before-close="handleClose">
+          <span>抱歉,借阅失败</span>
+          <span slot="footer" class="dialog-footer">
+    <el-button @click="dialogVisible9= false">取 消</el-button>
+    <el-button type="primary" @click="dialogVisible9= false">确 定</el-button>
+  </span>
+      </el-dialog>
+<!--      分页进度条-->
+      <el-pagination
+              @size-change="handleSizeChange"
+              @current-change="handleCurrentChange"
+              :current-page="currentPage"
+              :page-sizes="[5, 10, 15, 20]"
+              :page-size="5"
+              layout="total, sizes, prev, pager, next, jumper"
+              :total="400">
+      </el-pagination>
+
+  </div>
+
+<script>
+
+
+  new Vue({
+    el:"#app",
+
+     mounted() {
+         this.selectall();
+
+     },
+
+    methods: {
+
+        //用于查询所有 渲染页面
+        selectall()
+        {
+            var _this=this;
+            axios.get("/Book").then((res)=>{
+                _this.tableData=res.data.data;
+            })
+        } ,
+
+
+      //  复选框返回对应列的数据的方法
+      handleSelectionChange(val) {
+        this.multipleSelection = val;
+        console.log(this.multipleSelection)
+      },
+        //表单搜索的方法, 后期用于将数据请求到servlet中
+        onSubmit() {
+            console.log(this.brand);
+        },
+        // 重置提交表单 用于重置Book下的属性
+        resetaddform()
+        {
+            this.Book={};
+        },
+
+        resetupdateform()
+        {
+           this.book={};
+
+        },
+
+        resetdeleteform()
+        {
+            this.book={};
+        },
+
+
+
+
+        //用于对话框中的表单提交 然后返回给后台  添加到数据库tb_library
+        addbrand()
+        {
+            var _this=this;
+            axios({
+                method: "POST",
+                url: "/Book/add_tb_library",
+                data:_this.Book
+            }).then(function (res)
+            {
+                if(res.data.code==20011)
+                {
+                    _this.dialogVisible=false;
+                    _this.$message.success("添加成功");
+
+
+                }else if(res.data.code==20010)
+                {
+                    _this.$message.error("添加失败");
+                }
+                else
+                {
+                    _this.$message.error(res.data.msg);
+                }
+            }).finally(()=>{
+                _this.selectall();
+            });
+        },
+
+        //添加到数据库borrowing_records
+
+        //修改页面
+        handleUpdate()
+        {
+            var _this=this;
+            axios.get("/Book/getid/"+_this.book.updateId).then((res)=>{
+                if(res.data.code==20041)
+                {
+                    _this.Book=res.data.data;
+                    _this.dialogVisible2=true;
+                    _this.dialogVisible3=false;
+
+                }
+                else
+                {
+                    _this.$message.error(res.data.msg);
+                }
+            })
+        },
+        //    用于提交修改内容
+        handleEdit()
+        {
+            var _this=this;
+            axios.put("/Book",_this.Book).then((res)=>{
+                if(res.data.code==20031)
+                {
+                    _this.dialogVisible2=false;
+                    _this.$message.success("修改成功");
+                    _this.selectall();
+                }else if(res.data.code==20010)
+                {
+                    _this.$message.error("修改失败");
+                }
+                else
+                {
+                    _this.$message.error(res.data.msg);
+                }
+            }).catch(()=>{
+                _this.$message.info("取消修改操作");
+            });
+        },
+        //    用于删除内容
+        handleDelete()
+        {
+            var _this=this;
+            // 1 弹出提示框
+            this.$confirm("此操作永久删除当前数据,是否继续？","提示",{
+                type:"info"
+            }).then(()=>{
+                axios.delete("/Book/"+_this.book.deleteId).then((res)=>{
+                    if(res.data.code==20021)
+                    {
+
+                        _this.$message.success("删除成功");
+                        _this.dialogVisible4=false;
+                        _this.book={};
+
+                    }
+                    else
+                    {
+                        _this.$message.error("删除失败");
+                    }
+                }).finally(()=>{
+                    _this.selectall();
+                });
+            }).catch(()=>{
+                _this.$message.info("取消删除操作");
+            })
+        },
+
+        //    用于借阅书籍专门用的删除内容
+        handleDeleteByBorrow()
+        {
+            var _this=this;
+            // 1 弹出提示框
+            axios.delete("/Book/"+_this.Book.id).then((res)=>{
+                if(res.data.code==20021)
+                {
+                    _this.dialogVisible7=false;
+                    _this.dialogVisible8=true;
+                    _this.selectall();
+                }
+
+            })
+        },
+
+        // 用于获取用户输入的书名进行查找
+        handleGetBookName()
+        {
+            var _this=this;
+            console.log(_this.book.bookName)
+            axios.get("/Book/getBookName/"+_this.book.bookName).then((res)=>{
+                console.log(res.data.data)
+                console.log(res.data.msg)
+                if(res.data.code==20041)
+                {
+                    _this.tableData=res.data.data;
+                    _this.dialogVisible5=false;
+
+
+                }
+                else
+                {
+                    _this.$message.error(res.data.msg);
+                    console.log("错误")
+                }
+            })
+        },
+
+        handleBorrowBooks()
+        {
+            var _this=this;
+            axios.get("/Book/getBookNumber/"+_this.book.bookNumber).then((res)=>{
+                if(res.data.code==20041)
+                {
+                    _this.Book=res.data.data;
+                    _this.dialogVisible6=false;
+                    _this.dialogVisible7=true
+
+                }
+                else
+                {
+                    _this.dialogVisible9=true;
+                    _this.$message.error(res.data.msg);
+                }
+            })
+        },
+
+
+
+
+
+
+        handleSizeChange(val) {
+            console.log(`每页 ${val} 条`);
+        },
+        handleCurrentChange(val) {
+            console.log(`当前页: ${val}`);
+        },
+
+
+
+
+    },
+
+    data() {
+      return {
+          // 当前页面  填写数据页数
+          currentPage: 4,
+          // 用于控制对话框的显示和隐藏 默认false是隐藏 后期通过绑定按钮来控制
+          dialogVisible: false,
+          dialogVisible2:false,
+          dialogVisible3:false,
+          dialogVisible4:false,
+          dialogVisible5:false,
+          dialogVisible6:false,
+          dialogVisible7:false,
+          dialogVisible8:false,
+          dialogVisible9:false,
+          // 表单搜索的数据
+        Book:
+            {     id:"",
+                  bookNumber:"",
+                  bookName:"",
+                  author:"",
+                  price:"",
+                  description:"",
+                  status:''
+            },
+          // 复选框选中数据集合
+          multipleSelection: [],
+          // 表格数据
+        tableData: [
+
+        ],
+          //星级评价响应数据
+          star:4,
+
+      //    用于让用户写出要修改的书的id
+          book:{
+              updateId:"",
+              deleteId:"",
+              bookName: "",
+              bookNumber:""
+          }
+      }
+
+    }
+
+  })
+
+</script>
+</html>
