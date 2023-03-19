@@ -20,7 +20,7 @@
   * [MongoDB](/src/mongodb/docs.md)
   * [ElasticSearch](/src/elasticSearch/docs.md)
 
-* [前端技术](src/front/docs.md)
+* [前端技术](src/vue/docs.md)
 
 * 软件工具
 
